@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Swords, Gavel, ShieldAlert, Sparkles, Loader2, Trophy, Flame, ArrowRight, Share2, Camera } from 'lucide-react';
-import { getStoredCurrentUser, getStoredMatches, getStoredUsers, enterArenaMatchmaking, saveCurrentUser } from '@/lib/storage';
+import { getStoredCurrentUser, getStoredMatches, getStoredUsers, enterArenaMatchmaking, saveCurrentUser, autoCastAICrowdVotes } from '@/lib/storage';
 import { Match, UserProfile } from '@/lib/types';
 import MatchResultModal from '@/components/MatchResultModal';
 import ShareCardModal from '@/components/ShareCardModal';
@@ -25,7 +25,7 @@ export default function ArenaPage() {
 
     setCurrentUser(user);
 
-    // Check if user has an active pending match waiting for votes
+    // Check if user has an active pending match waiting for votes or just completed
     const pendingMatch = matches.find(
       (m) =>
         (m.playerAId === user.id || m.playerBId === user.id) &&
@@ -46,6 +46,23 @@ export default function ArenaPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Autonomous AI Background Voting Engine (runs every 3.5s when match is waiting for votes)
+  useEffect(() => {
+    if (!activeArenaMatch) return;
+
+    const interval = setInterval(() => {
+      const result = autoCastAICrowdVotes();
+      loadData();
+
+      // If active match was resolved by AI/community vote, show victory modal
+      if (result.matchResolved && result.resolvedMatchId === activeArenaMatch.match.id) {
+        setShowResultModal(true);
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [activeArenaMatch]);
 
   // Instant Matchmaking Start (Under 300ms)
   const handleStartMatchmaking = () => {
@@ -85,29 +102,6 @@ export default function ArenaPage() {
 
     // Immediately start matchmaking
     handleStartMatchmaking();
-  };
-
-  const handleSimulateVoteReceived = () => {
-    if (!activeArenaMatch) return;
-    const matches = getStoredMatches();
-    const current = matches.find((m) => m.id === activeArenaMatch.match.id);
-    if (!current) return;
-
-    if (Math.random() > 0.4) {
-      current.votesA += 1;
-    } else {
-      current.votesB += 1;
-    }
-    current.totalVotes += 1;
-
-    if (current.totalVotes >= 5) {
-      current.status = 'COMPLETED';
-      current.winnerId = current.votesA >= current.votesB ? current.playerAId : current.playerBId;
-      setShowResultModal(true);
-    }
-
-    localStorage.setItem('faceoff_matches_v1', JSON.stringify(matches));
-    loadData();
   };
 
   if (!currentUser) return null;
@@ -234,14 +228,9 @@ export default function ArenaPage() {
             </div>
           </div>
 
-          {/* Simulate Vote Received Button for Testing */}
-          <div className="pt-4 border-t border-arena-border text-center">
-            <button
-              onClick={handleSimulateVoteReceived}
-              className="px-6 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs border border-zinc-700"
-            >
-              ⚡ Receive Simulated Judge Vote ({activeArenaMatch.match.totalVotes}/5)
-            </button>
+          <div className="pt-4 border-t border-arena-border text-center text-xs text-zinc-400 flex items-center justify-center space-x-2">
+            <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+            <span>Community & AI Judges are actively voting on this match... ({activeArenaMatch.match.totalVotes}/5)</span>
           </div>
         </div>
       ) : (

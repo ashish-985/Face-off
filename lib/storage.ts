@@ -699,3 +699,46 @@ export function enterArenaMatchmaking(userId: string): {
 
   return { match: newMatch, opponent };
 }
+
+/**
+ * Autonomous AI Crowd Voting Engine.
+ * Automatically casts realistic community votes on waiting matches when online judges are idle.
+ */
+export function autoCastAICrowdVotes(): { matchResolved: boolean; resolvedMatchId?: string } {
+  const matches = getStoredMatches();
+  const users = getStoredUsers();
+
+  const waitingMatches = matches.filter((m) => m.status === 'WAITING_FOR_VOTES');
+  if (waitingMatches.length === 0) return { matchResolved: false };
+
+  // Select a match to vote on
+  const targetMatch = waitingMatches[Math.floor(Math.random() * waitingMatches.length)];
+  const pA = users.find((u) => u.id === targetMatch.playerAId);
+  const pB = users.find((u) => u.id === targetMatch.playerBId);
+
+  if (!pA || !pB) return { matchResolved: false };
+
+  // Calculate vote probability based on Elo rating difference
+  const eloDiff = (pA.rating || 1000) - (pB.rating || 1000);
+  const probA = 1 / (1 + Math.pow(10, -eloDiff / 400));
+  const votedForA = Math.random() < probA;
+
+  if (votedForA) {
+    targetMatch.votesA += 1;
+  } else {
+    targetMatch.votesB += 1;
+  }
+  targetMatch.totalVotes += 1;
+
+  let matchResolved = false;
+  if (targetMatch.totalVotes >= 5) {
+    resolveMatch(targetMatch, users);
+    matchResolved = true;
+  }
+
+  saveMatches(matches);
+  saveUsers(users);
+
+  return { matchResolved, resolvedMatchId: targetMatch.id };
+}
+
