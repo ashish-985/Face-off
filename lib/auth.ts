@@ -1,3 +1,5 @@
+import { generateInitialAvatar } from './storage';
+
 /**
  * Authentication Helper Configuration for Google OAuth & Supabase Auth
  */
@@ -28,8 +30,9 @@ export function signInWithGoogle(): void {
     id: `google_user_${Date.now()}`,
     name: 'Google User',
     email: 'user@gmail.com',
-    picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
+    picture: generateInitialAvatar('G', 0),
   };
 
   localStorage.setItem('faceoff_google_session', JSON.stringify(demoGoogleUser));
 }
+

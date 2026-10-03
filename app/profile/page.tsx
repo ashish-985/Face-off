@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getStoredCurrentUser, saveCurrentUser } from '@/lib/storage';
+import { getStoredCurrentUser, saveCurrentUser, generateInitialAvatar } from '@/lib/storage';
 import { UserProfile, ProfileVisibility } from '@/lib/types';
 import { getLevelFromXp } from '@/lib/xp';
 import BadgeGrid from '@/components/BadgeGrid';
@@ -11,10 +11,10 @@ import TierBadge from '@/components/TierBadge';
 import { Trophy, Gavel, Flame, ShieldCheck, Eye, Share2, Settings, Trash2, Camera } from 'lucide-react';
 
 const AVATAR_OPTIONS = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=80',
+  generateInitialAvatar('A', 0),
+  generateInitialAvatar('S', 1),
+  generateInitialAvatar('R', 2),
+  generateInitialAvatar('M', 3),
 ];
 
 export default function CurrentProfilePage() {

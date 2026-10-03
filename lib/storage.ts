@@ -12,19 +12,35 @@ const STORAGE_KEYS = {
   AGE_VERIFIED: 'faceoff_age_verified_v1',
 };
 
-// Seed Avatars from Unsplash
-const SEED_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=80',
-];
+/**
+ * Generates a clean dynamic SVG avatar with initial badge & gradient
+ */
+export function generateInitialAvatar(username: string, bgPairIndex: number = 0): string {
+  const initial = (username || 'U').trim().charAt(0).toUpperCase();
+  const colorPairs = [
+    ['#ff3b5c', '#8b5cf6'], // Red to Purple
+    ['#f59e0b', '#ef4444'], // Amber to Red
+    ['#06b6d4', '#3b82f6'], // Cyan to Blue
+    ['#10b981', '#06b6d4'], // Emerald to Cyan
+    ['#ec4899', '#8b5cf6'], // Pink to Purple
+    ['#8b5cf6', '#3b82f6'], // Violet to Blue
+    ['#f97316', '#eab308'], // Orange to Yellow
+  ];
+  const pair = colorPairs[bgPairIndex % colorPairs.length];
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${pair[0]}"/>
+        <stop offset="100%" stop-color="${pair[1]}"/>
+      </linearGradient>
+    </defs>
+    <rect width="200" height="200" rx="40" fill="url(#grad)"/>
+    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="96">${initial}</text>
+  </svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 export const CURRENT_USER_ID = 'user_ashish_001';
 
@@ -32,7 +48,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: CURRENT_USER_ID,
     username: 'ASHISH',
-    avatarUrl: SEED_AVATARS[1],
+    avatarUrl: generateInitialAvatar('ASHISH', 0),
     bio: 'Ready for the arena ⚔️ Voting daily.',
     rating: 1247,
     provisionalMatches: 12,
@@ -54,8 +70,8 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_alex_002',
     username: 'Alex Titan',
-    avatarUrl: SEED_AVATARS[0],
-    bio: 'Top 3 contender. Bring your best photo.',
+    avatarUrl: generateInitialAvatar('Alex Titan', 1),
+    bio: 'Top 3 contender. Snap your live selfie to battle.',
     rating: 1842,
     provisionalMatches: 50,
     wins: 82,
@@ -76,7 +92,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_rahul_003',
     username: 'Rahul_V',
-    avatarUrl: SEED_AVATARS[3],
+    avatarUrl: generateInitialAvatar('Rahul_V', 2),
     bio: 'Challenging the global leaderboard daily.',
     rating: 1819,
     provisionalMatches: 45,
@@ -98,7 +114,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_sam_004',
     username: 'Sam_K',
-    avatarUrl: SEED_AVATARS[2],
+    avatarUrl: generateInitialAvatar('Sam_K', 3),
     bio: 'Elo hunter.',
     rating: 1798,
     provisionalMatches: 38,
@@ -120,7 +136,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_sarah_005',
     username: 'Sarah_G',
-    avatarUrl: SEED_AVATARS[4],
+    avatarUrl: generateInitialAvatar('Sarah_G', 4),
     bio: 'Number 1 Judge on FACE-OFF ⚖️',
     rating: 1750,
     provisionalMatches: 40,
@@ -142,7 +158,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_mike_006',
     username: 'Mike_R',
-    avatarUrl: SEED_AVATARS[5],
+    avatarUrl: generateInitialAvatar('Mike_R', 5),
     bio: 'Battle ready.',
     rating: 1690,
     provisionalMatches: 29,
@@ -164,7 +180,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_elena_007',
     username: 'Elena_M',
-    avatarUrl: SEED_AVATARS[6],
+    avatarUrl: generateInitialAvatar('Elena_M', 6),
     bio: 'Arena enthusiast.',
     rating: 1540,
     provisionalMatches: 20,
@@ -186,7 +202,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_lucas_008',
     username: 'Lucas_B',
-    avatarUrl: SEED_AVATARS[7],
+    avatarUrl: generateInitialAvatar('Lucas_B', 0),
     bio: 'May the best profile win.',
     rating: 1480,
     provisionalMatches: 15,
@@ -208,7 +224,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_sophia_009',
     username: 'Sophia_X',
-    avatarUrl: SEED_AVATARS[8],
+    avatarUrl: generateInitialAvatar('Sophia_X', 1),
     bio: 'Casual competitor.',
     rating: 1390,
     provisionalMatches: 10,
@@ -230,7 +246,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user_david_010',
     username: 'David_H',
-    avatarUrl: SEED_AVATARS[9],
+    avatarUrl: generateInitialAvatar('David_H', 2),
     bio: 'Climbing up!',
     rating: 1280,
     provisionalMatches: 8,
@@ -316,7 +332,20 @@ export function getStoredUsers(): UserProfile[] {
     return INITIAL_USERS;
   }
   try {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    // Sanitize any leftover old Unsplash URLs into clean SVG initial avatars
+    let modified = false;
+    const cleaned = parsed.map((u: UserProfile, idx: number) => {
+      if (u.avatarUrl && u.avatarUrl.includes('unsplash.com')) {
+        modified = true;
+        return { ...u, avatarUrl: generateInitialAvatar(u.username, idx) };
+      }
+      return u;
+    });
+    if (modified) {
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch {
     return INITIAL_USERS;
   }
