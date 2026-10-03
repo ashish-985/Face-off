@@ -30,14 +30,23 @@ export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProp
         throw new Error('Webcam access is not supported by your browser.');
       }
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 400 },
-          height: { ideal: 400 },
-        },
-        audio: false,
-      });
+      let mediaStream: MediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 400 },
+            height: { ideal: 400 },
+          },
+          audio: false,
+        });
+      } catch (fallbackErr) {
+        // Fallback to basic video constraint without strict facingMode or resolution
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      }
 
       registerActiveStream(mediaStream);
 
@@ -48,10 +57,13 @@ export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProp
       setIsLoading(false);
     } catch (err: any) {
       console.error('Camera access error:', err);
-      setError(
-        err.message ||
-          'Unable to access webcam. Please check browser permissions.'
-      );
+      let msg = err.message || 'Unable to access webcam.';
+      if (err.name === 'NotReadableError' || msg.includes('Could not start video source')) {
+        msg = 'Camera is currently in use by another app (e.g. Zoom, Meet) or browser tab. Please close other camera apps and retry.';
+      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        msg = 'Camera permission denied. Please allow camera access in your browser settings.';
+      }
+      setError(msg);
       setIsLoading(false);
       setIsCameraActive(false);
     }
@@ -116,24 +128,22 @@ export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProp
       <canvas ref={canvasRef} className="hidden" />
 
       {error ? (
-        <div className="w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-center text-xs text-red-400 space-y-2">
+        <div className="w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-center text-xs text-red-400 space-y-3">
           <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
-          <p className="font-semibold">{error}</p>
-          <div className="flex justify-center space-x-2">
+          <p className="font-semibold leading-relaxed px-2">{error}</p>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
             <button
               onClick={startCamera}
-              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs"
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md"
             >
               Retry Camera
             </button>
-            {onCancel && (
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 font-semibold text-xs"
-              >
-                Cancel
-              </button>
-            )}
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs border border-zinc-700"
+            >
+              Skip / Use Avatar
+            </button>
           </div>
         </div>
       ) : capturedImage ? (
