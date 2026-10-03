@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Swords, Gavel, Trophy, ShieldAlert, Sparkles, Flame, CheckCircle, ArrowRight, Lock } from 'lucide-react';
+import { Swords, Gavel, Trophy, ShieldAlert, ShieldCheck, Sparkles, Flame, CheckCircle, ArrowRight, Lock } from 'lucide-react';
 import AgeGateModal from '@/components/AgeGateModal';
 import AuthModal from '@/components/AuthModal';
 import { getAgeVerified, getStoredCurrentUser } from '@/lib/storage';
@@ -35,9 +35,9 @@ export default function LandingPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-arena-accent/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-arena-accent/10 border border-arena-accent/30 text-arena-accent text-xs font-black uppercase tracking-widest mb-6 box-glow-accent animate-pulse">
-          <Sparkles className="w-4 h-4" />
-          <span>18+ Head-to-Head Arena</span>
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-widest mb-6">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Competitive Head-to-Head Arena</span>
         </div>
 
         <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-white max-w-4xl mx-auto leading-none">

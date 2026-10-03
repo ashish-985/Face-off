@@ -75,8 +75,8 @@ export default function Navbar() {
               <span className="text-xl font-black tracking-wider bg-gradient-to-r from-white via-zinc-200 to-arena-accent bg-clip-text text-transparent">
                 FACE-OFF
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-widest block text-arena-accent -mt-1">
-                18+ Arena
+              <span className="text-[10px] uppercase font-bold tracking-widest block text-zinc-400 -mt-1 flex items-center space-x-1">
+                <span>Competitive Arena</span>
               </span>
             </div>
           </Link>
