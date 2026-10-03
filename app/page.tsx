@@ -92,7 +92,7 @@ export default function LandingPage() {
 
         {/* Sign In / Sign Up Link */}
         <div className="mt-6 text-xs text-zinc-400">
-          {!user || user.username === 'ASHISH' ? (
+          {!user || user.username.startsWith('Contender_') ? (
             <button
               onClick={() => setShowAuthModal(true)}
               className="text-arena-accent hover:underline font-bold"

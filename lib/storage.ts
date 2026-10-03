@@ -4,6 +4,7 @@ import { XP_REWARDS } from './xp';
 
 const STORAGE_KEYS = {
   CURRENT_USER: 'faceoff_current_user_v1',
+  ACTIVE_SESSION: 'faceoff_active_session_id_v1',
   USERS: 'faceoff_users_v1',
   MATCHES: 'faceoff_matches_v1',
   VOTES: 'faceoff_votes_v1',
@@ -358,8 +359,44 @@ export function saveUsers(users: UserProfile[]): void {
 
 export function getStoredCurrentUser(): UserProfile {
   const users = getStoredUsers();
-  const current = users.find((u) => u.id === CURRENT_USER_ID);
-  return current || users[0];
+  if (!isClient()) return users[0];
+
+  const activeId = localStorage.getItem(STORAGE_KEYS.ACTIVE_SESSION);
+  if (activeId) {
+    const activeUser = users.find((u) => u.id === activeId);
+    if (activeUser) return activeUser;
+  }
+
+  // Create a fresh unique guest user for this device
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  const newGuest: UserProfile = {
+    id: `user_guest_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    username: `Contender_${randomNum}`,
+    avatarUrl: generateInitialAvatar(`Contender_${randomNum}`, Math.floor(Math.random() * 7)),
+    bio: 'Arena contender ⚔️',
+    rating: 1000,
+    provisionalMatches: 0,
+    wins: 0,
+    losses: 0,
+    streak: 0,
+    maxStreak: 0,
+    battleCredits: 1,
+    pendingVotesCount: 0,
+    totalVotesCast: 0,
+    judgeAgreements: 0,
+    playerXp: 25,
+    judgeXp: 0,
+    visibility: 'PUBLIC',
+    isAgeVerified: true,
+    createdAt: new Date().toISOString(),
+    badges: [],
+  };
+
+  users.push(newGuest);
+  saveUsers(users);
+  localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, newGuest.id);
+
+  return newGuest;
 }
 
 export function saveCurrentUser(updatedUser: UserProfile): void {
@@ -371,6 +408,9 @@ export function saveCurrentUser(updatedUser: UserProfile): void {
     users.push(updatedUser);
   }
   saveUsers(users);
+  if (isClient()) {
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, updatedUser.id);
+  }
 }
 
 export function getStoredMatches(): Match[] {
@@ -403,8 +443,9 @@ export function ensureActiveMatchesInQueue(forceNew: boolean = false): Match[] {
   const activeWaiting = matches.filter((m) => m.status === 'WAITING_FOR_VOTES');
 
   if (activeWaiting.length < 5 || forceNew) {
+    const currentUser = getStoredCurrentUser();
     for (let i = 0; i < 5; i++) {
-      const available = users.filter((u) => u.id !== CURRENT_USER_ID);
+      const available = users.filter((u) => u.id !== currentUser.id);
       const pA = available[Math.floor(Math.random() * available.length)];
       let pB = available[Math.floor(Math.random() * available.length)];
       while (pB.id === pA.id && available.length > 1) {

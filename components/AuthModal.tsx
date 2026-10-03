@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { User, Lock, Camera, CheckCircle2, X, RefreshCw } from 'lucide-react';
-import { saveCurrentUser, getStoredCurrentUser, generateInitialAvatar } from '@/lib/storage';
+import { saveCurrentUser, getStoredCurrentUser, getStoredUsers, generateInitialAvatar } from '@/lib/storage';
 import { signInWithGoogle } from '@/lib/auth';
 import { UserProfile } from '@/lib/types';
 import CameraCapture from './CameraCapture';
@@ -105,9 +105,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       };
       saveCurrentUser(newUser);
     } else {
-      const current = getStoredCurrentUser();
-      current.username = username.trim();
-      saveCurrentUser(current);
+      const users = getStoredUsers();
+      const existing = users.find((u) => u.username.toLowerCase() === username.trim().toLowerCase());
+      if (existing) {
+        saveCurrentUser(existing);
+      } else {
+        const current = getStoredCurrentUser();
+        current.username = username.trim();
+        saveCurrentUser(current);
+      }
     }
 
     onSuccess();
